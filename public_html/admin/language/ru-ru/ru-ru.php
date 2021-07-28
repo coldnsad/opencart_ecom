@@ -153,6 +153,7 @@ $_['tab_extra_tab']          		= 'Доп Таб';
 $_['tab_module']          	 		= 'Таб';
 $_['tab_related']          	 		= 'Рекомендуем';
 $_['tab_existence']          	    = 'Наличие';
+$_['tab_item']          	        = 'Item';
 
 // Error
 $_['error_exception']               = 'Ошибка кода(%s): %s в %s на строке %s';

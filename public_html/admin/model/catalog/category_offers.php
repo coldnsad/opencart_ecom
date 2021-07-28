@@ -307,7 +307,7 @@ class ModelCatalogCategoryOffers extends Model {
 		}
 	} */
 
-	//New function for ckf_category_views
+	//New function for ckf_category_offers
 	public function editCategory($category_id, $data) {
 		
 		/* $query = $this->db->query("SELECT offers_id FROM " . DB_PREFIX . "category_views WHERE views_id=" . $category_id . "");
@@ -682,7 +682,7 @@ class ModelCatalogCategoryOffers extends Model {
 		return $query->rows;
 	} */
 
-	//New function for ckf_category_views
+	//New function for ckf_category_offers
 	public function getCategories($data = array()) {
 		
 		$sql = "SELECT cp.offers_id AS category_id, GROUP_CONCAT(cd1.name ORDER BY cp.level SEPARATOR '&nbsp;&nbsp;&gt;&nbsp;&nbsp;') AS name, c1.parent_id, c1.sort_order, c1.noindex 

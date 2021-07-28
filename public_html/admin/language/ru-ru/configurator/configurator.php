@@ -3,9 +3,11 @@
 // *	@license	GNU General Public License version 3; see LICENSE.txt
 
 // Heading
-$_['heading_title']          = 'Products';
-$_['heading_title_offer']    = 'Offer';
-$_['heading_title_view']     = 'View';
+$_['heading_title']          = 'House';
+$_['heading_title_elements'] = 'Elements';
+$_['heading_title_materials']= 'Materials';
+$_['heading_title_series']   = 'Series';
+$_['heading_title_product']  = 'Product';
 
 // Text
 $_['text_success']           = 'Настройки успешно изменены!';
@@ -33,6 +35,11 @@ $_['text_none_manufacturer']            = ' --- Без Производител�
 
 // Column
 $_['column_name']            = 'Название';
+$_['column_product_link']    = 'Связь с Product';
+$_['column_series']          = 'Серия';
+$_['column_element']         = 'Элемент';
+$_['column_material']        = 'Материал';
+$_['column_sort']            = 'Сортировка';
 $_['column_category']        = 'Категория';
 $_['column_manufacturer']    = 'Производитель';
 $_['column_model']           = 'Код товара';
@@ -48,6 +55,14 @@ $_['column_location']        = 'Местоположение';
 // Entry
 $_['entry_name']             = 'Название товара';
 $_['entry_name_configurator']= 'Наименование';
+$_['entry_house']            = 'Дом';
+$_['entry_preview']          = 'Preview';
+$_['entry_series']           = 'Серия';
+$_['entry_product_link']     = 'Связь c Product';
+$_['entry_view_link']        = 'Связь c View';
+$_['entry_is_add_item']      = 'Добавить item?';
+$_['entry_element']          = 'Элемент';
+$_['entry_material']         = 'Материал';
 $_['entry_description']      = 'Описание';
 $_['entry_description_mini'] = 'Краткое Описание:';
 $_['entry_meta_title'] 	     = 'Мета-тег Title';

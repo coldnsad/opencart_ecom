@@ -754,8 +754,9 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 			
+			//Reports	
 			$report = array();
-							
+
 			if ($this->user->hasPermission('access', 'report/report')) {
 				$report[] = array(
 					'name'	   => $this->language->get('text_reports'),
@@ -786,7 +787,58 @@ class ControllerCommonColumnLeft extends Controller {
 				'name'	   => $this->language->get('text_reports'),
 				'href'     => '',
 				'children' => $report
-			);	
+			);
+			
+			//Configurator
+			$configurator = array();
+
+			if ($this->user->hasPermission('access', 'configurator/house')) {
+				$configurator[] = array(
+					'name'	   => $this->language->get('text_house'),
+					'href'     => $this->url->link('configurator/house', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);
+			}
+					
+			if ($this->user->hasPermission('access', 'configurator/elements')) {
+				$configurator[] = array(
+					'name'	   => $this->language->get('text_elements'),
+					'href'     => $this->url->link('configurator/elements', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);
+			}
+											
+			if ($this->user->hasPermission('access', 'configurator/material')) {
+				$configurator[] = array(
+					'name'	   => $this->language->get('text_material'),
+					'href'     => $this->url->link('configurator/material', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);
+			}
+			
+			if ($this->user->hasPermission('access', 'configurator/series')) {
+				$configurator[] = array(
+					'name'	   => $this->language->get('text_series'),
+					'href'     => $this->url->link('configurator/series', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'configurator/product')) {
+				$configurator[] = array(
+					'name'	   => $this->language->get('text_product'),
+					'href'     => $this->url->link('configurator/product', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);
+			}
+			
+			$data['menus'][] = array(
+				'id'       => 'menu-configurator',
+				'icon'	   => 'fa-bar-chart-o', 
+				'name'	   => $this->language->get('text_configurator'),
+				'href'     => '',
+				'children' => $configurator
+			);						
 			
 			// Stats
 			$this->load->model('sale/order');
