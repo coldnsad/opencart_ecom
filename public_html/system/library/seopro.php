@@ -19,6 +19,8 @@ class SeoPro {
 	private $session;
 	private $db;
 	private $cat_tree = [];
+	private $cat_views_tree = [];
+	private $cat_offers_tree = [];
 	private $keywords = [];
 	private $queries = [];
 	private $product_categories = [];
@@ -41,6 +43,8 @@ class SeoPro {
 		$this->detectPostfix();
 		$this->detectLanguage();	
 		$this->initHelpers();	
+		$this->initViewsHelpers();	
+		$this->initOffersHelpers();	
 		if ($this->config->get('config_valide_param_flag')) {
 			$params = explode ("\r\n", $this->config->get('config_valide_params'));
 			if(!empty($params)) {
@@ -66,11 +70,29 @@ class SeoPro {
 					
 					if(!empty($url[0])) {
 						
-						if(!in_array($url[0], ['category_id', 'product_id', 'manufacturer_id', 'information_id', 'article_id', 'blog_category_id'])) {
+						if(!in_array($url[0], ['category_id', 'product_id','views_id', 'view_id','offers_id', 'offer_id', 'video_category_id', 'manufacturer_id', 'information_id', 'article_id', 'blog_category_id'])) {
 							return $parts;
 						}						
 						
 						if ($url[0] == 'category_id') {
+							if (!isset($this->request->get['path'])) {
+								$this->request->get['path'] = $url[1];
+							} else {
+								$this->request->get['path'] .= '_' . $url[1];
+							}
+						} elseif ($url[0] == 'views_id') {
+							if (!isset($this->request->get['path'])) {
+								$this->request->get['path'] = $url[1];
+							} else {
+								$this->request->get['path'] .= '_' . $url[1];
+							}
+						} elseif ($url[0] == 'video_category_id') {
+							if (!isset($this->request->get['path'])) {
+								$this->request->get['path'] = $url[1];
+							} else {
+								$this->request->get['path'] .= '_' . $url[1];
+							}
+						} elseif ($url[0] == 'offers_id') {
 							if (!isset($this->request->get['path'])) {
 								$this->request->get['path'] = $url[1];
 							} else {
@@ -103,9 +125,30 @@ class SeoPro {
 			};
 			$path = $this->getCategoryByProduct($this->request->get['product_id']);
 			if ($path) $this->request->get['path'] = $path;
-			$this->request->get['route'] = 'product/product';									
+			$this->request->get['route'] = 'product/product';
+		} elseif (isset($this->request->get['view_id'])) {
+			if(isset($this->request->get['path'])) {
+				unset($this->request->get['path']);
+			};
+			$path = $this->getCategoryByView($this->request->get['view_id']);
+			if ($path) $this->request->get['path'] = $path;
+			$this->request->get['route'] = 'product/view';
+		} elseif (isset($this->request->get['offer_id'])) {
+
+			if(isset($this->request->get['path'])) {
+				unset($this->request->get['path']);
+			};
+			$path = $this->getCategoryByOffer($this->request->get['offer_id']);
+			if ($path) $this->request->get['path'] = $path;
+			$this->request->get['route'] = 'product/offer';
+
 		} elseif (isset($this->request->get['path'])) {
-			$this->request->get['route'] = 'product/category';
+			if($url[0] == 'offers_id') {
+				$this->request->get['route'] = 'product/offers';
+			}
+			elseif($url[0] == 'views_id') {
+				$this->request->get['route'] = 'product/views';
+			}
 		} elseif (isset($this->request->get['manufacturer_id'])) {
 			$this->request->get['route'] = 'product/manufacturer/info';
 		} elseif (isset($this->request->get['information_id'])) {
@@ -135,41 +178,115 @@ class SeoPro {
 	
 		switch ($data['route']) {
 			case 'product/product':
-			if (isset($data['product_id'])) {
-				$route = 'product/product';
-				$path = '';
-				$product_id = $data['product_id'];
-				if (isset($data['path'])) {
-					$path = $this->getCategoryByProduct($product_id);
+				if (isset($data['product_id'])) {
+					$route = 'product/product';
+					$path = '';
+					$product_id = $data['product_id'];
+					if (isset($data['path'])) {
+						$path = $this->getCategoryByProduct($product_id);
+					}
+					
+					//start add valide get-param
+					if ($this->valide_get_param) {
+						$valide_get_param_data = [];
+						foreach($this->valide_get_param as $get_param) {
+							if (isset($data[$get_param])) {
+								$valide_get_param_data[$get_param] = $data[$get_param];
+								$this->response->addHeader('X-Robots-Tag: noindex');
+							}
+						};
+					}
+					//end add valide get-param
+					
+					unset($data);
+					$data['route'] = $route;
+					
+					if ($path && $this->config->get('config_seo_url_include_path')) {
+						$data['path'] = $path;
+					}	
+					
+					$data['product_id'] = $product_id;
+					//start add valide get-param
+					if ($this->valide_get_param) {
+						$data = array_merge($data, $valide_get_param_data);
+					}
+					//end add valide get-param
 				}
-				
-				//start add valide get-param
+					break;				
+			case 'product/view':
+				if (isset($data['view_id'])) {
+					$route = 'product/view';
+					$path = '';
+					$view_id = $data['view_id'];
+					if (isset($data['path'])) {
+						$path = $this->getCategoryByView($view_id);
+				}
+						
+						//start add valide get-param
 				if ($this->valide_get_param) {
-					$valide_get_param_data = [];
-					foreach($this->valide_get_param as $get_param) {
-						if (isset($data[$get_param])) {
-							$valide_get_param_data[$get_param] = $data[$get_param];
-							$this->response->addHeader('X-Robots-Tag: noindex');
+						$valide_get_param_data = [];
+						foreach($this->valide_get_param as $get_param) {
+							if (isset($data[$get_param])) {
+								$valide_get_param_data[$get_param] = $data[$get_param];
+								$this->response->addHeader('X-Robots-Tag: noindex');
+							}
+						};
+				}
+						//end add valide get-param
+						
+						unset($data);
+						$data['route'] = $route;
+						
+						if ($path && $this->config->get('config_seo_url_include_path')) {
+							$data['path'] = $path;
+						}	
+						
+						$data['view_id'] = $view_id;
+						//start add valide get-param
+						if ($this->valide_get_param) {
+							$data = array_merge($data, $valide_get_param_data);
 						}
-					};
-				}
-				//end add valide get-param
-				
-				unset($data);
-				$data['route'] = $route;
-				
-				if ($path && $this->config->get('config_seo_url_include_path')) {
-					$data['path'] = $path;
-				}	
-				
-				$data['product_id'] = $product_id;
-				//start add valide get-param
-				if ($this->valide_get_param) {
-					$data = array_merge($data, $valide_get_param_data);
-				}
-				//end add valide get-param
-			}
-				break;				
+						//end add valide get-param
+					}
+						break;				
+
+						case 'product/offer':
+							if (isset($data['offer_id'])) {
+								$route = 'product/offer';
+								$path = '';
+								$offer_id = $data['offer_id'];
+								if (isset($data['path'])) {
+									$path = $this->getCategoryByOffer($offer_id);
+							}
+									
+									//start add valide get-param
+							if ($this->valide_get_param) {
+									$valide_get_param_data = [];
+									foreach($this->valide_get_param as $get_param) {
+										if (isset($data[$get_param])) {
+											$valide_get_param_data[$get_param] = $data[$get_param];
+											$this->response->addHeader('X-Robots-Tag: noindex');
+										}
+									};
+							}
+									//end add valide get-param
+									
+									unset($data);
+									$data['route'] = $route;
+									
+									if ($path && $this->config->get('config_seo_url_include_path')) {
+										$data['path'] = $path;
+									}	
+									
+									$data['offer_id'] = $offer_id;
+									//start add valide get-param
+									if ($this->valide_get_param) {
+										$data = array_merge($data, $valide_get_param_data);
+									}
+									//end add valide get-param
+								}
+			break;	
+
 			//blog	
 			
 			case 'blog/article':	
@@ -257,6 +374,18 @@ class SeoPro {
 					$postfix = true;
 					unset($data[$key]);
 					break;
+				case 'view_id':
+					$view_id = (int)$value;
+					$queries[] = 'view_id=' . $view_id;
+					$postfix = true;
+					unset($data[$key]);
+					break;	
+				case 'offer_id':
+					$offer_id = (int)$value;
+					$queries[] = 'offer_id=' . $offer_id;
+					$postfix = true;
+					unset($data[$key]);
+					break;	
 				case 'manufacturer_id':
 				 	$manufacturer_id = (int)$value;
 					$queries[] = 'manufacturer_id=' . $manufacturer_id;
@@ -264,6 +393,10 @@ class SeoPro {
 					unset($data[$key]);
 					break;
 				case 'category_id':
+				case 'offers_id':
+				case 'views_id':
+				case 'video_category_id':
+					
 				case 'information_id':
 					$information_id = (int)$value;
 					$queries[] = 'information_id=' . $information_id;
@@ -285,14 +418,45 @@ class SeoPro {
 					unset($data[$key]);
 					break;
 				
-				//blog	
+				//Path	
 				case 'path':
-					$categories = explode('_', $value);
+					if ( $route == 'product/views'  || $route == 'product/view') {
+						$categories = explode('_', $value);
+						foreach ($categories as $views_id) {
+							$queries[] = 'views_id=' . (int)$views_id;
+						}
+						unset($data[$key]);
+						break;
+					} elseif ( $route == 'product/offers' || $route == 'product/offer') {
+						$categories = explode('_', $value);
+						foreach ($categories as $offers_id) {
+							$queries[] = 'offers_id=' . (int)$offers_id;
+						}
+						unset($data[$key]);
+						break;
+					} elseif ( $route == 'product/video_category' ) {
+						$categories = explode('_', $value);
+						foreach ($categories as $video_category_id) {
+							$queries[] = 'video_category_id=' . (int)$video_category_id;
+						}
+						unset($data[$key]);
+						break;
+					} elseif ( $route == 'product/offers' ) {
+						$categories = explode('_', $value);
+						foreach ($categories as $offers_id) {
+							$queries[] = 'offers_id=' . (int)$offers_id;
+						}
+						unset($data[$key]);
+						break;
+					} elseif ( $route == 'product/category' ) {
+						$categories = explode('_', $value);
 					foreach ($categories as $category_id) {
 						$queries[] = 'category_id=' . (int)$category_id;
 					}
 					unset($data[$key]);
-					break;
+					break;					
+					}
+
 				default:
 					break;
 			}
@@ -379,6 +543,124 @@ class SeoPro {
 			foreach ($categories as $category_id => $category) {
 				$path = $this->getPath($categories, $category_id);
 				$this->cat_tree[$category_id]['path'] = $path;
+					
+			};
+			
+		}
+		//end_category_tree
+		
+		//keyword_data
+		if ($this->config->get('config_seo_url_cache')) {		
+
+			$this->keywords = $this->cache->get('seopro.keywords');
+			$this->queries = $this->cache->get('seopro.queries');
+
+			if ((!$this->keywords || empty($this->keywords) || !$this->queries || empty($this->queries))) {
+				
+				$sql_keyword = 'keyword';
+				if ($this->config->get('config_seopro_lowercase')) 
+					$sql_keyword = 'LCASE(keyword) as '. $sql_keyword;		
+
+				$sql = "SELECT " . $sql_keyword . ", query, store_id, language_id FROM " . DB_PREFIX . "seo_url WHERE 1";	
+			
+				$query = $this->db->query($sql);
+				if($query->num_rows) {
+					foreach($query->rows as $row) {
+						$this->keywords[$row['query']][$row['store_id']][$row['language_id']] = $row['keyword'];
+						$this->queries[$row['keyword']][$row['store_id']][$row['language_id']] = $row['query'];
+					}
+				}
+			}
+		}
+		//end_keyword_data		
+	}
+
+	private function initViewsHelpers() {
+		// start views_tree
+		if($this->config->get('config_seo_url_cache')){		
+			$this->cat_tree = $this->cache->get('seopro.cat_tree');
+		}
+		
+		if(!$this->cat_views_tree || empty($this->cat_views_tree)) {
+		
+			$this->cat_views_tree = [];
+			
+			$all_cat_query = $this->db->query("SELECT views_id, parent_id FROM " . DB_PREFIX . "category_views ORDER BY parent_id");
+				
+			$allcats = [];
+			$categories = [];
+			
+			if($all_cat_query->num_rows) {
+				$allcats = $all_cat_query->rows;
+			};
+			
+			foreach ($allcats as $category) {
+				$categories[$category['views_id']]['parent_id'] = $category['parent_id'];
+			};
+			unset ($allcats);
+			
+			foreach ($categories as $category_id => $category) {
+				$path = $this->getPath($categories, $category_id);
+				$this->cat_views_tree[$category_id]['path'] = $path;
+					
+			};
+			
+		}
+		//end_category_tree
+		
+		//keyword_data
+		if ($this->config->get('config_seo_url_cache')) {		
+
+			$this->keywords = $this->cache->get('seopro.keywords');
+			$this->queries = $this->cache->get('seopro.queries');
+
+			if ((!$this->keywords || empty($this->keywords) || !$this->queries || empty($this->queries))) {
+				
+				$sql_keyword = 'keyword';
+				if ($this->config->get('config_seopro_lowercase')) 
+					$sql_keyword = 'LCASE(keyword) as '. $sql_keyword;		
+
+				$sql = "SELECT " . $sql_keyword . ", query, store_id, language_id FROM " . DB_PREFIX . "seo_url WHERE 1";	
+			
+				$query = $this->db->query($sql);
+				if($query->num_rows) {
+					foreach($query->rows as $row) {
+						$this->keywords[$row['query']][$row['store_id']][$row['language_id']] = $row['keyword'];
+						$this->queries[$row['keyword']][$row['store_id']][$row['language_id']] = $row['query'];
+					}
+				}
+			}
+		}
+		//end_keyword_data		
+	}
+
+	private function initOffersHelpers() {
+		// start views_tree
+		if($this->config->get('config_seo_url_cache')){		
+			$this->cat_offers_tree = $this->cache->get('seopro.cat_tree');
+		}
+		
+		if(!$this->cat_offers_tree || empty($this->cat_offers_tree)) {
+		
+			$this->cat_offers_tree = [];
+			
+			$all_cat_query = $this->db->query("SELECT offers_id, parent_id FROM " . DB_PREFIX . "category_offers ORDER BY parent_id");
+				
+			$allcats = [];
+			$categories = [];
+			
+			if($all_cat_query->num_rows) {
+				$allcats = $all_cat_query->rows;
+			};
+			
+			foreach ($allcats as $category) {
+				$categories[$category['offers_id']]['parent_id'] = $category['parent_id'];
+			};
+			unset ($allcats);
+			
+			foreach ($categories as $category_id => $category) {
+				$path = $this->getPath($categories, $category_id);
+				$this->cat_offers_tree[$category_id]['path'] = $path;
 					
 			};
 			
@@ -604,6 +886,55 @@ class SeoPro {
 		return $category_id;
 	}
 
+	private function getCategoryByView($view_id) {
+
+		if ((int)$view_id < 1) 
+			return false;
+				
+		if ($this->config->get('config_seo_url_cache')) {	
+			$this->product_categories = $this->cache->get('seopro.product_views');
+			if(isset($this->product_categories[$view_id])) 
+				return $this->product_categories[$view_id];
+		}
+
+		//Category_id === views_id in table DB_PREFIX_view_to_category
+		$query = $this->db->query("
+			SELECT category_id FROM " . DB_PREFIX . "view_to_category WHERE view_id = '" . (int)$view_id . "' ORDER BY main_category DESC LIMIT 1");
+		//$views_id = $this->getPathByCategory($query->num_rows ? (int)$query->row['category_id'] : 0);
+		$views_id = $this->getPathByViews($query->num_rows ? (int)$query->row['category_id'] : 0);
+		
+		if ($this->config->get('config_seo_url_cache')) {
+			$this->product_categories[$view_id] = $views_id;
+		}	
+	
+		return $views_id;
+	}
+
+	private function getCategoryByOffer($offer_id) {
+
+		if ((int)$offer_id < 1) 
+			return false;
+				
+		if ($this->config->get('config_seo_url_cache')) {	
+			$this->product_categories = $this->cache->get('seopro.product_offers');
+			if(isset($this->product_categories[$offer_id])) 
+				return $this->product_categories[$offer_id];
+		}
+
+		//Category_id === offers_id in table DB_PREFIX_offer_to_category
+		$query = $this->db->query("
+			SELECT category_id FROM " . DB_PREFIX . "offer_to_category WHERE offer_id = '" . (int)$offer_id . "' ORDER BY main_category DESC LIMIT 1"
+		
+		);
+		$offers_id = $this->getPathByOffers($query->num_rows ? (int)$query->row['category_id'] : 0);
+		
+		if ($this->config->get('config_seo_url_cache')) {
+			$this->product_categories[$offer_id] = $offers_id;
+		}	
+	
+		return $offers_id;
+	}
+
 	private function getPathByCategory($category_id) {
 		
 		$path = '';
@@ -617,6 +948,34 @@ class SeoPro {
 
 		return $path;
 			
+	}
+	
+	private function getPathByViews($views_id) {
+		
+		$path = '';
+
+		if ((int)$views_id < 1 && !isset($this->cat_views_tree[$views_id])) 
+			return false;
+		
+		if (!empty($this->cat_views_tree[$views_id]['path']) && is_array($this->cat_views_tree[$views_id]['path'])) {
+			$path = implode('_', $this->cat_views_tree[$views_id]['path']);
+		}
+
+		return $path;			
+	}
+
+	private function getPathByOffers($offers_id) {
+		
+		$path = '';
+
+		if ((int)$offers_id < 1 && !isset($this->cat_offers_tree[$offers_id])) 
+			return false;
+		
+		if (!empty($this->cat_offers_tree[$offers_id]['path']) && is_array($this->cat_offers_tree[$offers_id]['path'])) {
+			$path = implode('_', $this->cat_offers_tree[$offers_id]['path']);
+		}
+
+		return $path;			
 	}
 	
 	private function getBlogPathByArticle($article_id) {
