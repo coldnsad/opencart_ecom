@@ -30,8 +30,38 @@
     {% endif %}
 
     <div class="row">
-      <div id="filter-product" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
+      <div id="" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
       
+      {# Form for Adding attributes for products #}
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-filter"></i>{{ entry_attribute }}</h3>
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label class="control-label" for="input-attritute">{{ entry_attribute_list }}</label>
+              <select name="attribute_id" class="form-control" id="input-attritute" form="form-product">
+                {% for key,value in attributes_data %}
+                  <optgroup label="{{ key }}">
+                    {% for attribute in value %}
+                      <option value="{{ attribute.attribute_id }}">{{ attribute.attribute_name }}</option>
+                    {% endfor %}
+                  </optgroup>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="control-label" for="attribute-value">{{ entry_attribute_value }}</label>
+              <input type="text" name="attribute_value" placeholder="{{ entry_attribute_value }}" id="attribute-value" class="form-control" form="form-product" />
+            </div>
+            <div class="form-group text-left">
+              <button type="submit" form="form-product" formaction="{{ add_attribute_for_product }}" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_add }}</button>
+			        <button type="submit" form="form-product" formaction="{{ delete_attribute_for_product }}" class="btn btn-default"><i class="fa fa-times"></i><span class="hidden-sm"> {{ button_delete }}</span></button>
+            </div>                  
+          </div>          
+        </div>
+      {# END Form for Adding attributes for products #}
+
       {# Form for Adding filters for products #}
         <div class="panel panel-default">
           <div class="panel-heading">
@@ -49,12 +79,13 @@
                         </optgroup>
                       {% endfor %}
                     </select>
-              <div class="form-group text-left">
-                <button type="submit" form="form-product" formaction="{{ add_filter_for_product }}" class="btn btn-default"><i class="fa fa-filter"></i> {{ text_add }}</button>
-              </div>                  
             </div>
+            <div class="form-group text-left">
+              <button type="submit" form="form-product" formaction="{{ add_filter_for_product }}" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_add }}</button>
+            </div>                  
           </div>
         </div>
+      {# END Form for Adding filters for products #}
 
         <div class="panel panel-default">
           <div class="panel-heading">
@@ -277,7 +308,8 @@
                       <td class="text-right">{% if sort == 'p.quantity' %} <a href="{{ sort_quantity }}" class="{{ order|lower }}">{{ column_quantity }}</a> {% else %} <a href="{{ sort_quantity }}">{{ column_quantity }}</a> {% endif %}</td>
                       <td class="text-left">{% if sort == 'p.status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
                       <td class="text-left">{% if sort == 'p.noindex' %} <a href="{{ sort_noindex }}" class="{{ order|lower }}">{{ column_noindex }}</a> {% else %} <a href="{{ sort_noindex }}">{{ column_noindex }}</a> {% endif %}</td>
-					  <td class="text-right">{{ column_action }}</td>
+                      <td class="text-left">{{ column_attribute }}</td>
+					            <td class="text-right">{{ column_action }}</td>
                     </tr>
                   </thead>
                   <tbody>
@@ -300,11 +332,14 @@
                       {% endif %}</td>
                     <td class="text-right">{% if product.quantity <= 0 %} <span class="label label-warning">{{ product.quantity }}</span> {% elseif product.quantity <= 5 %} <span class="label label-danger">{{ product.quantity }}</span> {% else %} <span class="label label-success">{{ product.quantity }}</span> {% endif %}</td>
                     <td class="text-left">{{ product.status }}</td>
-					<td class="text-left">{{ product.noindex }}</td>
+					          <td class="text-left">{{ product.noindex }}</td>
+                    <td>
+                      <input type="text" name="attribute_product[{{ product.product_id }}]" placeholder="{{ entry_attribute_value }}" id="attribute-product" class="form-control" />
+                    </td>
                     <td class="text-right">
-						<a target="_blank" href="{{ product.href_shop }}" data-toggle="tooltip" title="{{ button_shop }}" class="btn btn-success"><i class="fa fa-eye"></i></a>
-						<a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
-					</td>
+                      <a target="_blank" href="{{ product.href_shop }}" data-toggle="tooltip" title="{{ button_shop }}" class="btn btn-success"><i class="fa fa-eye"></i></a>
+                      <a href="{{ product.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+				          	</td>
                   </tr>
                   {% endfor %}
                   {% else %}

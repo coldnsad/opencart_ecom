@@ -614,6 +614,8 @@ class ControllerCatalogProduct extends Controller {
 		$data['enabled'] = $this->url->link('catalog/product/enable', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['disabled'] = $this->url->link('catalog/product/disable', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['add_filter_for_product'] = $this->url->link('catalog/product/addFilterForProduct', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['add_attribute_for_product'] = $this->url->link('catalog/product/addAttributeForProduct', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['delete_attribute_for_product'] = $this->url->link('catalog/product/deleteAttributeForProduct', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
 		$data['products'] = array();
 
@@ -831,7 +833,27 @@ class ControllerCatalogProduct extends Controller {
 		if (isset($this->request->get['order'])) {
 			$url .= '&order=' . $this->request->get['order'];
 		}
+		//Attributes data
+		$this->load->model('catalog/attribute');
+		
+		$data['attributes_data'] = array();
 
+		$attribute_groups = $this->model_catalog_attribute->getAttributesGroupsId();
+
+		foreach ($attribute_groups as $key => $attribute_id) {
+			
+			$attributes = $this->model_catalog_attribute->getAttributesByGroupId($attribute_id['attribute_group_id']);
+			foreach ($attributes as $key => $value) {
+	
+				$data['attributes_data'][$value['attribute_group_name']][] = array(
+	
+					'attribute_id'   => $value['attribute_id'],
+					'attribute_name' => $value['attribute_name']
+				);
+			}
+		}
+		
+		//Filters data 
 		$filter_groups = $this->model_catalog_filter->getFilterGroupsId();
 
 		foreach ($filter_groups as $key => $group_id) {
@@ -1421,7 +1443,7 @@ class ControllerCatalogProduct extends Controller {
 					'product_attribute_description' => $product_attribute['product_attribute_description']
 				);
 			}
-		}
+		}		
 
 		// Options
 		$this->load->model('catalog/option');
@@ -1948,6 +1970,72 @@ class ControllerCatalogProduct extends Controller {
 		
 		$this->session->data['success'] = $this->language->get('text_success');
 		$this->model_catalog_product->addFilterForProduct($this->request->post);
+
+		$this->response->redirect($this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'] . $url, true));
+	}
+
+	public function addAttributeForProduct() {
+
+		$this->load->model('catalog/product');
+		$this->load->language('catalog/product');
+
+		$url = '';
+		$data = array();
+		
+		if (isset($this->request->post['selected'])) {
+
+			$attribute_products = $this->request->post['attribute_product'];
+			
+			foreach($this->request->post['selected'] as $product_id) {
+				
+				if ($attribute_products[$product_id]) {
+					
+					$data[] = array(
+						'product_id'   => $product_id,
+						'attribute_id' => $this->request->post['attribute_id'],
+						'value' 	   => $attribute_products[$product_id]);
+				} else {
+
+					if (!empty($this->request->post['attribute_value'])) {
+						
+						$data[] = array(
+							'product_id'   => $product_id,
+							'attribute_id' => $this->request->post['attribute_id'],
+							'value' 	   => $this->request->post['attribute_value']);
+					}
+				}
+			}
+			if (!empty($data)) {
+
+				$this->model_catalog_product->addAttribute($data);
+				$this->session->data['success'] = $this->language->get('text_success');	
+			}
+		}
+
+		$this->response->redirect($this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'] . $url, true));
+	}
+
+	public function deleteAttributeForProduct() {
+		
+		$this->load->model('catalog/product');
+		$this->load->language('catalog/product');
+
+		$url = '';
+		$data = array();
+		
+		if (isset($this->request->post['selected'])) {
+
+			foreach($this->request->post['selected'] as $product_id) {
+				
+				$data[] = array(
+					'product_id'   => $product_id,
+					'attribute_id' => $this->request->post['attribute_id']);
+			}
+
+			$this->model_catalog_product->deleteAttribute($data);
+			$this->session->data['success'] = $this->language->get('text_success');	
+		
+		}
 
 		$this->response->redirect($this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'] . $url, true));
 	}

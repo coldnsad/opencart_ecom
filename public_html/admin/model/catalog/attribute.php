@@ -102,4 +102,21 @@ class ModelCatalogAttribute extends Model {
 
 		return $query->row['total'];
 	}
+
+	public function getAttributesGroupsId(){
+		$query = $this->db->query("SELECT attribute_group_id FROM ". DB_PREFIX ."attribute_group");
+
+		return $query->rows;
+	}
+
+	public function getAttributesByGroupId($attribute_group_id) {
+		$query = $this->db->query("SELECT DISTINCT a.attribute_id, a.attribute_group_id, ad.name as attribute_name, agd.name as attribute_group_name FROM ". DB_PREFIX ."attribute a 
+		
+		LEFT JOIN ". DB_PREFIX ."attribute_description ad ON ad.attribute_id = a.attribute_id
+		LEFT JOIN ". DB_PREFIX ."attribute_group_description agd ON a.attribute_group_id = agd.attribute_group_id
+		
+		WHERE a.attribute_group_id = '". $attribute_group_id ."'");
+		
+		return $query->rows;
+	}
 }

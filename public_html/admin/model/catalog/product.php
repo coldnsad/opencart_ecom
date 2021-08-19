@@ -557,6 +557,41 @@ class ModelCatalogProduct extends Model {
 						  ");
 	}
 
+	public function addFilterForProduct($data) {
+
+		foreach($data['selected'] as $key => $value) {
+
+			$query = $this->db->query("SELECT * FROM ". DB_PREFIX . "product_filter WHERE product_id='". $value ."' AND filter_id='". $data['filter'] ."'");
+
+			if(!$query->rows) $this->db->query("INSERT INTO " . DB_PREFIX . "product_filter SET product_id='". $value ."', filter_id='". $data['filter'] ."'");
+			
+		}
+
+
+	}
+
+	public function addAttribute($data) {
+
+		foreach($data as $key => $value) {
+
+			$this->db->query("DELETE FROM ". DB_PREFIX ."product_attribute WHERE product_id = '". $value['product_id'] ."' AND attribute_id = '". $value['attribute_id'] ."' ");
+			$this->db->query("INSERT INTO ". DB_PREFIX ."product_attribute SET 
+							  
+							  product_id   = '". $value['product_id'] ."',
+							  attribute_id = '". $value['attribute_id'] ."',
+							  language_id  = 1,
+							  text 		   = '". $value['value'] ."'");
+		}
+	}
+
+	public function deleteAttribute($data) {
+
+		foreach($data as $key => $value) {
+
+			$this->db->query("DELETE FROM ". DB_PREFIX ."product_attribute WHERE product_id = '". $value['product_id'] ."' AND attribute_id = '". $value['attribute_id'] ."' ");
+		}
+	}
+
 	public function getProductsWithoutPackage() {
 		$query = "SELECT p.product_id 'id', p.sku, pd.name, pp.product_id FROM " . DB_PREFIX . "product p 
 				  LEFT JOIN " . DB_PREFIX . "product_description pd ON p.product_id = pd.product_id 
@@ -2482,19 +2517,6 @@ class ModelCatalogProduct extends Model {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "product_to_layout WHERE layout_id = '" . (int)$layout_id . "'");
 
 		return $query->row['total'];
-	}
-
-	public function addFilterForProduct($data) {
-
-		foreach($data['selected'] as $key => $value) {
-
-			$query = $this->db->query("SELECT * FROM ". DB_PREFIX . "product_filter WHERE product_id='". $value ."' AND filter_id='". $data['filter'] ."'");
-
-			if(!$query->rows) $this->db->query("INSERT INTO " . DB_PREFIX . "product_filter SET product_id='". $value ."', filter_id='". $data['filter'] ."'");
-			
-		}
-
-
 	}
 
 	public function getProductBySku($sku) {
