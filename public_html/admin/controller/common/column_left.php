@@ -779,7 +779,15 @@ class ControllerCommonColumnLeft extends Controller {
 					'href'     => $this->url->link('report/statistics', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()		
 				);
-			}	
+			}
+			
+			if ($this->user->hasPermission('access', 'report/product_offer_state')) {
+				$report[] = array(
+					'name'	   => $this->language->get('text_product_offer_state'),
+					'href'     => $this->url->link('report/product_offer_state', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);
+			}
 			
 			$data['menus'][] = array(
 				'id'       => 'menu-report',

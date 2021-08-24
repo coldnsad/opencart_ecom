@@ -98,6 +98,7 @@ $_['text_shipping']                    = 'Доставка';
 $_['text_setting']                     = 'Настройки';
 $_['text_seo_url']                     = 'SEO URL';
 $_['text_statistics']           	   = 'Статистика';
+$_['text_product_offer_state']         = 'Состояние product-offer';
 $_['text_stock_status']                = 'Состояние на складе';
 $_['text_system']                      = 'Система';
 $_['text_tax']                         = 'Налоги';
