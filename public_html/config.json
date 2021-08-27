@@ -1,0 +1,5 @@
+{
+    "HTTP_SERVER"     : "http://localhost/ckf/",
+    "DIR_ROOT"        : "E:/Programs/Ampps/www/ckf/",
+    "SCREENSHOT_PATH" : "E:/Programs/Ampps/www/ckf/image/tests/screenshots/"
+}
