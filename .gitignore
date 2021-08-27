@@ -1,4 +1,5 @@
 public_html/image/
 public_html/admin/config.php
 public_html/config.php
+public_html/nodeJs/node_modules
 storage/cache/
