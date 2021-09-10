@@ -10,25 +10,26 @@ const devices = {
 
 //Addresses
 var addresses;
-fs.readFile(`${paths.DIR_ROOT}/nodeJs/addresses.json`, 'utf8', function(errors, data) {
+fs.readFile(`${paths.DIR_STORAGE}/addresses.json`, 'utf8', function(errors, data) {
   if (errors) console.log(errors);
   addresses = JSON.parse(data);
 });
 
 searchBrokenLinks();
 
+//Begin searchBrokenLinks
 function searchBrokenLinks(){
 
     (async () => {
 
         const browser = await puppeteer.launch();
         const page = await browser.newPage();   
-        fs.open(`${paths.BROKEN_LINKS_LOGS_PATH}broken_links.txt`,'w', (error) => {if (error) console.log(error)});
+        fs.open(`${paths.DIR_STORAGE}/logs/broken_links.txt`,'w', (error) => {if (error) console.log(error)});
         
         for (let address in addresses) {
     
             await page.goto(paths.HTTP_SERVER + addresses[address]);
-            fs.appendFile(`${paths.BROKEN_LINKS_LOGS_PATH}broken_links.txt`,`${paths.HTTP_SERVER + addresses[address]}:\n`,(error) => {if (error) console.log(error)});
+            fs.appendFile(`${paths.DIR_STORAGE}/logs/broken_links.txt`,`${paths.HTTP_SERVER + addresses[address]}:\n`,(error) => {if (error) console.log(error)});
 
             //All images from page
             let images = await page.evaluate(() => {
@@ -61,10 +62,10 @@ function searchBrokenLinks(){
 
                 if (images[image]["src"] == 'unknown') {
                     
-                    fs.appendFile(`${paths.BROKEN_LINKS_LOGS_PATH}broken_links.txt`,`Img_URL: ${images[image]["src"]}; ALT: ${images[image]["alt"]}\n`,
+                    fs.appendFile(`${paths.DIR_STORAGE}/logs/broken_links.txt`,`Img_URL: ${images[image]["src"]}; ALT: ${images[image]["alt"]}\n`,
                                                                                                             (error) => {if (error) console.log(error)});
                     if (!screened) {
-                        doPageScreen(addresses[address]);  
+                        doPageScreen(addresses[address], address);  
                         screened = true;
                     } 
                     continue;
@@ -74,10 +75,10 @@ function searchBrokenLinks(){
                     
                 if (images[image]["src"] == 'unknown' || response.status() != '200') {
                     
-                        fs.appendFile(`${paths.BROKEN_LINKS_LOGS_PATH}broken_links.txt`,`Img_URL: ${images[image]["src"]}; ALT: ${images[image]["alt"]}\n`,
+                        fs.appendFile(`${paths.DIR_STORAGE}/logs/broken_links.txt`,`Img_URL: ${images[image]["src"]}; ALT: ${images[image]["alt"]}\n`,
                                                                                                                 (error) => {if (error) console.log(error)});
                         if (!screened) {
-                            doPageScreen(addresses[address]);  
+                            doPageScreen(addresses[address], address);  
                             screened = true;
                         }
                     }
@@ -89,10 +90,10 @@ function searchBrokenLinks(){
 
                 if (videos[video]["src"] == 'unknown') {
                     
-                    fs.appendFile(`${paths.BROKEN_LINKS_LOGS_PATH}broken_links.txt`,`Video_URL: ${videos[video]["src"]}\n`,
+                    fs.appendFile(`${paths.DIR_STORAGE}/logs/broken_links.txt`,`Video_URL: ${videos[video]["src"]}\n`,
                                                                                 (error) => {if (error) console.log(error)});
                     if (!screened) {
-                        doPageScreen(ddresses[address]);  
+                        doPageScreen(addresses[address], address);  
                         screened = true;
                     }
                     continue;
@@ -102,22 +103,30 @@ function searchBrokenLinks(){
                 
                 if (response.status() != '200' && response.status() != '304') { 
                     
-                    fs.appendFile(`${paths.BROKEN_LINKS_LOGS_PATH}broken_links.txt`,`Video_URL: ${videos[video]["src"]}\n`,
+                    fs.appendFile(`${paths.DIR_STORAGE}/logs/broken_links.txt`,`Video_URL: ${videos[video]["src"]}\n`,
                                                                                 (error) => {if (error) console.log(error)});
                     
                     if (!screened) {
-                        doPageScreen(addresses[address]);  
+                        doPageScreen(addresses[address], address);  
                         screened = true;
                     }
                 }
             }
-            fs.appendFile(`${paths.BROKEN_LINKS_LOGS_PATH}broken_links.txt`,'\n',(error) => {if (error) console.log(error)});
+            fs.appendFile(`${paths.DIR_STORAGE}/logs/broken_links.txt`,'\n',(error) => {if (error) console.log(error)});
+
+            //Erase the address that was checked
+            delete addresses[address];
+            console.log(addresses);
         }
+        fs.writeFile(`${paths.DIR_STORAGE}/addresses.json`, JSON.stringify(addresses), function(errors, data) {
+            if (errors) console.log(errors)
+        });
         browser.close();
     })();
-}
+} //End searchBrokenLinks
 
-function doPageScreen(url) {
+//Begin doPageScreen
+function doPageScreen(url, name_for_file) {
 
     (async () => {
   
@@ -137,17 +146,15 @@ function doPageScreen(url) {
     });
   
     await page.screenshot({
-      path: `${paths.SCREENSHOT_PATH}${url}_desktop.png`,
+      path: `${paths.SCREENSHOT_PATH}${name_for_file}_desktop.png`,
       fullPage: true
     });
-    
-    for (let device in devices) {
-      
-      //Page emulate
+
+    for (let device in devices) {     
+
       await page.emulate(devices[device]);
-      // Create a screenshot 
       await page.screenshot({
-        path: `${paths.SCREENSHOT_PATH}${url}_${device}.png`,
+        path: `${paths.SCREENSHOT_PATH}${name_for_file}_${device}.png`,
         fullPage: true
       });
     }
@@ -155,4 +162,4 @@ function doPageScreen(url) {
     // Close Browser
     browser.close();
     })();
-}
+} //End doPageScreen
