@@ -24,11 +24,13 @@ class ControllerCatalogCategoryOffers extends Controller {
 
 		$this->load->model('catalog/category_offers');
 
+		$addresses = array();
+
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 
             /* print_r($this->request->post);
             return; */
-			$this->model_catalog_category_offers->addCategory($this->request->post);
+			$offers_id = $this->model_catalog_category_offers->addCategory($this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -46,6 +48,17 @@ class ControllerCatalogCategoryOffers extends Controller {
 				$url .= '&page=' . $this->request->get['page'];
 			}
 
+			$addresses = json_decode(file_get_contents(DIR_STORAGE . 'addresses.json'),true);
+			$offers = $this->model_catalog_category_offers->getCategory($offers_id);
+
+			if ($offers) {
+
+				$addresses["path=$offers_id"] = "index.php?route=product/offers&path=$offers_id";
+
+				$addresses = json_encode($addresses);
+				file_put_contents(DIR_STORAGE . 'addresses.json', $addresses);
+			}
+			
 			$this->response->redirect($this->url->link('catalog/category_offers', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 

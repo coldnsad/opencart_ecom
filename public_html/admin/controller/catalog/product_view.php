@@ -23,11 +23,12 @@ class ControllerCatalogProductView extends Controller {
 
 		$this->load->model('catalog/product');
 
+		$addresses = array();		
+
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			/* print_r($this->request->post);
 			return; */
-			$this->model_catalog_product->addView($this->request->post);
-
+			$view_id = $this->model_catalog_product->addView($this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
 			
@@ -94,6 +95,19 @@ class ControllerCatalogProductView extends Controller {
 
 			if (isset($this->request->get['page'])) {
 				$url .= '&page=' . $this->request->get['page'];
+			}
+			
+			$addresses = json_decode(file_get_contents(DIR_STORAGE . 'addresses.json'),true);
+			$view_category_data = $this->model_catalog_product->getViewCategories($view_id);
+
+			if ($view_category_data) {
+				
+				foreach ($view_category_data as $category_id) {
+					
+					$addresses["path=$category_id&view_id=$view_id"] = "index.php?route=product/view&path=$category_id&view_id=$view_id";
+				}
+				$addresses = json_encode($addresses);
+				file_put_contents(DIR_STORAGE . 'addresses.json', $addresses);
 			}
 
 			$this->response->redirect($this->url->link('catalog/product_view', 'user_token=' . $this->session->data['user_token'] . $url, true));
@@ -292,12 +306,15 @@ class ControllerCatalogProductView extends Controller {
 		$this->getList();
 	}
 
+	//Need to change method for view
 	public function copy() {
 		$this->load->language('catalog/product');
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		$this->load->model('catalog/product');		
+		$this->load->model('catalog/product');
+		
+		$addresses = array();
 
 		if (isset($this->request->post['selected']) && $this->validateCopy()) {
 			foreach ($this->request->post['selected'] as $product_id) {
@@ -369,6 +386,20 @@ class ControllerCatalogProductView extends Controller {
 
 			if (isset($this->request->get['page'])) {
 				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			//Product_id change to view_id
+			$addresses = json_decode(file_get_contents(DIR_STORAGE . 'addresses.json'),true);
+			$view_category_data = $this->model_catalog_product->getViewCategories($product_id);
+
+			if ($view_category_data) {
+				
+				foreach ($view_category_data as $category_id) {
+					
+					$addresses["path=$category_id&view_id=$product_id"] = "index.php?route=product/view&path=$category_id&view_id=$product_id";
+				}
+				$addresses = json_encode($addresses);
+				file_put_contents(DIR_STORAGE . 'addresses.json', $addresses);
 			}
 
 			$this->response->redirect($this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'] . $url, true));

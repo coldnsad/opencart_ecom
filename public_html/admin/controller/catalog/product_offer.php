@@ -23,10 +23,12 @@ class ControllerCatalogProductOffer extends Controller {
 
 		$this->load->model('catalog/product');
 
+		$addresses = array();
+
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			/* print_r($this->request->post);
 			return; */
-			$this->model_catalog_product->addOffer($this->request->post);
+			$offer_id = $this->model_catalog_product->addOffer($this->request->post);
 
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -95,6 +97,20 @@ class ControllerCatalogProductOffer extends Controller {
 			if (isset($this->request->get['page'])) {
 				$url .= '&page=' . $this->request->get['page'];
 			}
+
+			$addresses = json_decode(file_get_contents(DIR_STORAGE . 'addresses.json'),true);
+			$offer_category_data = $this->model_catalog_product->getOfferCategories($offer_id);
+
+			if ($offer_category_data) {
+				
+				foreach ($offer_category_data as $category_id) {
+					
+					$addresses["path=$category_id&offer_id=$offer_id"] = "index.php?route=product/offer&path=$category_id&offer_id=$offer_id";
+				}
+				$addresses = json_encode($addresses);
+				file_put_contents(DIR_STORAGE . 'addresses.json', $addresses);
+			}
+
 
 			$this->response->redirect($this->url->link('catalog/product_offer', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
@@ -288,6 +304,7 @@ class ControllerCatalogProductOffer extends Controller {
 		$this->getList();
 	}
 
+	//Need to change method for offer
 	public function copy() {
 		$this->load->language('catalog/product');
 
@@ -365,6 +382,20 @@ class ControllerCatalogProductOffer extends Controller {
 
 			if (isset($this->request->get['page'])) {
 				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			//Product_id change to offer_id
+			$addresses = json_decode(file_get_contents(DIR_STORAGE . 'addresses.json'),true);
+			$offer_category_data = $this->model_catalog_product->getOfferCategories($product_id);
+
+			if ($offer_category_data) {
+				
+				foreach ($offer_category_data as $category_id) {
+					
+					$addresses["path=$category_id&offer_id=$product_id"] = "index.php?route=product/offer&path=$category_id&offer_id=$product_id";
+				}
+				$addresses = json_encode($addresses);
+				file_put_contents(DIR_STORAGE . 'addresses.json', $addresses);
 			}
 
 			$this->response->redirect($this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'] . $url, true));

@@ -1989,6 +1989,30 @@ class ModelCatalogProduct extends Model {
 
 		return $product_category_data;
 	}
+
+	public function getViewCategories($view_id) {
+		$view_category_data = array();
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "view_to_category WHERE view_id = '" . (int)$view_id . "'");
+
+		foreach ($query->rows as $result) {
+			$view_category_data[] = $result['category_id'];
+		}
+
+		return $view_category_data;
+	}
+
+	public function getOfferCategories($offer_id) {
+		$offer_category_data = array();
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "offer_to_category WHERE offer_id = '" . (int)$offer_id . "'");
+
+		foreach ($query->rows as $result) {
+			$offer_category_data[] = $result['category_id'];
+		}
+
+		return $offer_category_data;
+	}
 	
 	public function getProductMainCategoryId($product_id) {
 		$query = $this->db->query("SELECT category_id FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "' AND main_category = '1' LIMIT 1");
@@ -2595,5 +2619,9 @@ class ModelCatalogProduct extends Model {
 								   WHERE plp.product_id = '". $product_id ."'");
 
 		return $query->rows;
+	}
+
+	public function getViewPaths() {
+
 	}
 }

@@ -1,6 +1,7 @@
 {
     "HTTP_SERVER"             : "http://localhost/ckf/",
     "DIR_ROOT"                : "E:/Programs/Ampps/www/ckf/",
+    "DIR_STORAGE"             : "E:/Programs/Ampps/storage/",
     "SCREENSHOT_PATH"         : "E:/Programs/Ampps/storage/logs/screenshots/",
-    "BROKEN_LINKS_LOGS_PATH" : "E:/Programs/Ampps/storage/logs/"
+    "BROKEN_LINKS_LOGS_PATH"  : "E:/Programs/Ampps/storage/logs/"
 }

@@ -26,6 +26,8 @@ class ControllerCatalogCategoryViews extends Controller {
 		$this->load->model('catalog/category_views');
 		$this->load->model('catalog/category_offers');
 
+		$addresses = array();
+
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			
 			/* print_r($this->request->post);
@@ -40,10 +42,10 @@ class ControllerCatalogCategoryViews extends Controller {
 				
 				$this->request->post['parent_id'] = $parent_views_id;
 				$this->request->post['offers_id'] = $offers_id;
-				$this->model_catalog_category_views->addCategory($this->request->post);
+				$views_id = $this->model_catalog_category_views->addCategory($this->request->post);
 			}
 			else {
-				$this->model_catalog_category_views->addCategory($this->request->post);
+				$views_id = $this->model_catalog_category_views->addCategory($this->request->post);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -60,6 +62,17 @@ class ControllerCatalogCategoryViews extends Controller {
 
 			if (isset($this->request->get['page'])) {
 				$url .= '&page=' . $this->request->get['page'];
+			}
+
+			$addresses = json_decode(file_get_contents(DIR_STORAGE . 'addresses.json'),true);
+			$views = $this->model_catalog_category_views->getCategory($views_id);
+
+			if ($views) {
+
+				$addresses["path=$views_id"] = "index.php?route=product/views&path=$views_id";
+
+				$addresses = json_encode($addresses);
+				file_put_contents(DIR_STORAGE . 'addresses.json', $addresses);
 			}
 
 			$this->response->redirect($this->url->link('catalog/category_views', 'user_token=' . $this->session->data['user_token'] . $url, true));
