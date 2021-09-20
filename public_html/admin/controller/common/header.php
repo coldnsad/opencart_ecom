@@ -84,7 +84,8 @@ class ControllerCommonHeader extends Controller {
 				);
 			}
 		}
-		
+
+		$data['yandex_api_key'] = $this->config->get('config_yandex_api_key');
 		$data['search'] = $this->load->controller('search/search');
 		
 		return $this->load->view('common/header', $data);

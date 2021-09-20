@@ -1,0 +1,133 @@
+{{ header }}{{ column_left }}
+<div id="content">
+
+  <div class="page-header">
+    <div class="container-fluid">
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_map }}</h3>
+        {# {{ stores_coordinates|length }} #}
+        {# {{ count_of_stores }} #}
+      </div>      
+      <div class="panel-body">
+        <div id="map" style="width: 1000px; height: 600px;"></div>        
+        <div class="row">
+          <div class="col-sm-6 text-left">{{ pagination }}</div>
+          <div class="col-sm-6 text-right">{{ results }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript"> 
+
+//geoFindMe();
+(ymaps.ready(init));
+
+function init() { 
+
+  if(!navigator.geolocation) {
+    console.log('Geolocation is not supported by your browser');
+  } else { 
+    navigator.geolocation.getCurrentPosition(success, error);
+   //console.log(window.coords);
+  }
+
+  function success(position) {
+    
+    stores_data = {{ stores_coordinates|json_encode() }};  
+
+    var myMap = new ymaps.Map("map", {
+            center: [stores_data[0].geometry.coordinates[0] , stores_data[0].geometry.coordinates[1]],
+            zoom: 15
+        }, {
+            searchControlProvider: 'yandex#search'
+        }),
+        stores, myPosition;
+    
+    function findClosestObjects () {
+        // Найдем в выборке кафе, ближайшее к найденной станции метро,
+        // и откроем его балун.
+        stores.getClosestTo(myPosition.get(0)).balloon.open();
+        
+        // Будем открывать балун кафе, который ближе всего к месту клика
+        myMap.events.add('click', function (event) {
+            stores.getClosestTo(event.get('coords')).balloon.open();
+        });
+    }
+    
+    // Описания кафе можно хранить в формате JSON, а потом генерировать
+    // из описания геообъекты с помощью ymaps.geoQuery.
+    stores = ymaps.geoQuery({
+        type: 'FeatureCollection',
+        features: stores_data  
+    // Сразу добавим точки на карту.
+    }).addToMap(myMap);
+    
+
+
+    var location = ymaps.geolocation.get();
+    // Асинхронная обработка ответа.
+    location.then(
+      function(result) {
+        // Добавление местоположения на карту.
+        myMap.geoObjects.add(result.geoObjects)
+      },
+      function(err) {
+        console.log('Ошибка: ' + err)
+      }
+    );
+  
+    // С помощью обратного геокодирования найдем метро "Кропоткинская".
+    myPosition = ymaps.geoQuery(ymaps.geocode([position.coords.latitude, position.coords.longitude]))
+    // Нужно дождаться ответа от сервера и только потом обрабатывать полученные результаты.
+        .then(findClosestObjects);
+    
+  } 
+
+  function error() {
+    console.log('Unable to retrieve your location');
+  }
+  
+}
+
+
+
+
+{# function geoFindMe() {
+
+  function success(position) {
+    window.coords  =  {
+      latitude : position.coords.latitude,
+      longitude: position.coords.longitude
+    }
+    //console.log(window.coords);
+  } 
+  
+
+  function error() {
+    console.log('Unable to retrieve your location');
+  }
+
+  if(!navigator.geolocation) {
+    console.log('Geolocation is not supported by your browser');
+  } else { 
+    navigator.geolocation.getCurrentPosition(success, error);
+   //console.log(window.coords);
+  }
+
+} #}
+
+</script>
+{{ footer }}
