@@ -1624,6 +1624,10 @@ class ModelCatalogProduct extends Model {
 			$sql .= " AND p.noindex = '" . (int)$data['filter_noindex'] . "'";
 		}
 
+		if (isset($data['filter_no_image']) && $data['filter_no_image']) {
+			$sql .= " AND p.image is null";
+		}
+
 		$sql .= " GROUP BY p.product_id";
 
 		$sort_data = array(
@@ -2316,6 +2320,10 @@ class ModelCatalogProduct extends Model {
 			$sql .= " AND p.noindex = '" . (int)$data['filter_noindex'] . "'";
 		}
 
+		if (isset($data['filter_no_image']) && $data['filter_no_image']) {
+			$sql .= " AND p.image is NULL";
+		}
+
 		$query = $this->db->query($sql);
 
 		return $query->row['total'];
@@ -2621,7 +2629,17 @@ class ModelCatalogProduct extends Model {
 		return $query->rows;
 	}
 
-	public function getViewPaths() {
+	public function setImages($data) {
 
+		foreach ($data as $key => $value) {
+			
+			if (!empty($value['newImage'])){
+				
+				$this->db->query("UPDATE ". DB_PREFIX ."product SET image = '". $value['newImage'] ."' WHERE product_id = '". $value['product_id'] ."'");
+			}
+			else{
+				$this->db->query("UPDATE ". DB_PREFIX ."product SET image = NULL WHERE product_id = '". $value['product_id'] ."'");
+			}
+		}		
 	}
 }

@@ -5,6 +5,7 @@
       <div class="pull-right">
         <button type="button" data-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-product').toggleClass('hidden-sm hidden-xs');" class="btn btn-default hidden-md hidden-lg"><i class="fa fa-filter"></i></button>
         <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+        <button type="submit" form="form-product" formaction="{{ update_images }}" data-toggle="tooltip" title="Обновить изображения" class="btn btn-default"><i class="fa fa-picture-o"></i></button>
         <button type="submit" form="form-product" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>
         <button type="submit" form="form-product" formaction="{{ enabled }}" data-toggle="tooltip" title="{{ button_enable }}" class="btn btn-default"><i class="fa fa-play"></i></button>
 		<button type="submit" form="form-product" formaction="{{ disabled }}" data-toggle="tooltip" title="{{ button_disable }}" class="btn btn-default"><i class="fa fa-pause"></i></button>
@@ -94,13 +95,13 @@
           <div class="panel-body">
             <div class="form-group">
               <label class="control-label" for="input-name">{{ entry_name }}</label>
-        <div class="input-group">
-              <input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
-        <div class="input-group-btn">
-                    <button type="button" id="button-clear-input-name" class="btn btn-default"><i class="fa fa-times"></i></button>
-      </div>
-      </div>
-      </div>
+              <div class="input-group">
+                <input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+                <div class="input-group-btn">
+                  <button type="button" id="button-clear-input-name" class="btn btn-default"><i class="fa fa-times"></i></button>
+                </div>
+              </div>
+            </div>
             <div class="form-group">
               <label class="control-label" for="input-model">{{ entry_model }}</label>
 			  <div class="input-group">
@@ -192,77 +193,16 @@
               <label class="control-label" for="input-status">{{ entry_status }}</label>
               <select name="filter_status" id="input-status" class="form-control">
                 <option value=""></option>
-                
-                
-                
-                  
-                
-
                   {% if filter_status == '1' %}
-
-                
-                
-                  
-                
-                
                 <option value="1" selected="selected">{{ text_enabled }}</option>
-                
-                
-                
-                  
-                
-
                   {% else %}
-
-                
-                
-                  
-                
-                
                 <option value="1">{{ text_enabled }}</option>
-                
-                
-                
-                  
-                
-
                   {% endif %}
                   {% if filter_status == '0' %}
-
-                
-                
-                  
-                
-                
                 <option value="0" selected="selected">{{ text_disabled }}</option>
-                
-                
-                
-                  
-                
-
                   {% else %}
-
-                
-                
-                  
-                
-                
                 <option value="0">{{ text_disabled }}</option>
-                
-                
-                
-                  
-                
-
                   {% endif %}
-
-
-              
-              
-                
-              
-              
               </select>
             </div>
 			<div class="form-group">
@@ -280,6 +220,11 @@
                 <option value="0">{{ text_disabled }}</option>
                   {% endif %}
               </select>
+			</div>
+
+      <div class="form-group">
+              <label class="control-label" for="input-noindex">{{ entry_no_image }}</label>
+              <input type="checkbox" class="checkbox-inline" name="filter_no_image" id="input-no-image" class="form-control"{% if filter_no_image %} checked="checked" {% endif %} />
 			</div>
             <div class="form-group text-right">
               <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
@@ -315,6 +260,7 @@
                   <tbody>
                   
                   {% if products %}
+                  {% set image_index = 0 %}
                   {% for product in products %}
                   <tr>
                     <td class="text-center">{% if product.product_id in selected %}
@@ -322,7 +268,23 @@
                       {% else %}
                       <input type="checkbox" name="selected[]" value="{{ product.product_id }}" />
                       {% endif %}</td>
-                    <td class="text-center">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</td>
+                    <td class="text-center">
+                     {# open-photo-swiper #}
+                      {% if product.image %} 
+                        <a href="" id="thumb-image-{{ product.product_id }}" data-toggle="image" class="img-thumbnail">
+                          <img src="{{ product.thumb }}" alt="" class="img-thumbnail" data-placeholder="{{ placeholder }}"/>
+                        </a>
+                        <button type="button" class="btn btn-primary btn-sm open-photo-swiper" data-index="{{ image_index }}"><i class="fa fa-window-restore"></i></button>
+                        <input type="hidden" name="images[{{ product.product_id }}]" value="{{ product.image }}" id="input-image-{{ product.product_id }}" />
+                        {% set image_index = image_index + 1 %}
+                      {% else %}
+                        <a href="" id="thumb-image-{{ product.product_id }}" data-toggle="image" class="img-thumbnail">
+                          <img src="{{ product.thumb }}" alt="" class="img-thumbnail" data-placeholder="{{ placeholder }}"/>
+                        </a>
+                        <input type="hidden" name="images[{{ product.product_id }}]" value="{{ product.image }}" id="input-image-{{ product.product_id }}" /> 
+                        {# <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span>  #}
+                      {% endif %}
+                    </td>
                     <td class="text-left">{{ product.name }}</td>
                     <td class="text-left">{{ product.model }}</td>
                     <td class="text-right">{% if product.special %} <span style="text-decoration: line-through;">{{ product.price }}</span><br/>
@@ -361,7 +323,76 @@
       </div>
     </div>
   </div>
-  <script type="text/javascript"><!--
+</div>
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. --> 
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script type="text/javascript"><!--
 $('#button-filter').on('click', function() {
 	var url = '';
 
@@ -421,6 +452,11 @@ $('#button-filter').on('click', function() {
 	var filter_noindex = $('select[name=\'filter_noindex\']').val();
 	if (filter_noindex !== '') {
 		url += '&filter_noindex=' + encodeURIComponent(filter_noindex);
+	}
+
+  var filter_no_image = $('input[name=\'filter_no_image\']');
+	if (filter_no_image.prop('checked')) {
+		url += '&filter_no_image';
 	}
 
 	location = 'index.php?route=catalog/product&user_token={{ user_token }}' + url;
@@ -573,5 +609,39 @@ $('input[name=\'filter_name\'], input[name=\'filter_model\'], input[name=\'filte
 		return false;
 	}
 });
-//--></script></div>
+//--></script>
+
+<script>
+
+  var openPhotoSwiper = function() {
+
+    var pswpElement = document.querySelectorAll('.pswp')[0];
+      
+    // build items array
+    var items = [];
+    {% for product in products %}
+      {% if product.image %}
+        items.push({
+                  src: '{{ product.popup_image }}',
+                  h: {{ popup_image_height }},
+                  w: {{ popup_image_width }}
+                  });
+      {% endif %}   
+    {% endfor %}
+
+    //items[this.dataset.index]['src'] = $(this).prev('a').children('img').attr('src');
+    
+    var options = {
+
+        index: parseInt(this.dataset.index),
+    };
+
+    // Initializes and opens PhotoSwipe
+    var gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options);
+    gallery.init();
+  };
+
+  $(".open-photo-swiper").click(openPhotoSwiper);
+
+</script>
 {{ footer }} 

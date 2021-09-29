@@ -16,6 +16,7 @@ class Pagination {
 	public $limit = 20;
 	public $num_links = 8;
 	public $url = '';
+	public $class = null;
 	public $text_first = '|&lt;';
 	public $text_last = '&gt;|';
 	public $text_next = '&gt;';
@@ -46,7 +47,7 @@ class Pagination {
 
 		$this->url = str_replace('%7Bpage%7D', '{page}', $this->url);
 
-		$output = '<ul class="pagination">';
+		$output = ($this->class) ?  "<ul class=\"$this->class\">" : '<ul class="pagination">';
 
 		if ($page > 1) {
 			$output .= '<li><a href="' . str_replace(array('&amp;page={page}', '?page={page}', '&page={page}'), '', $this->url) . '">' . $this->text_first . '</a></li>';

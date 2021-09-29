@@ -26,8 +26,7 @@ class ControllerCatalogProduct extends Controller {
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			
 			$this->model_catalog_product->addProduct($this->request->post);
-			/* print_r($this->request->post['location']);
-			return; */
+			
 			$this->session->data['success'] = $this->language->get('text_success');
 			
 			$url = '';
@@ -434,6 +433,12 @@ class ControllerCatalogProduct extends Controller {
 		} else {
 			$filter_status = '';
 		}
+
+		if (isset($this->request->get['filter_no_image'])) {
+			$filter_no_image = true;
+		} else {
+			$filter_no_image = false;
+		}
 		
 		$filter_sub_category = null;
 		if (isset($this->request->get['filter_category'])) {
@@ -588,6 +593,10 @@ class ControllerCatalogProduct extends Controller {
 			$url .= '&filter_noindex=' . $this->request->get['filter_noindex'];
 		}
 
+		if (isset($this->request->get['filter_no_image'])) {
+			$url .= '&filter_no_image';
+		}
+
 		if (isset($this->request->get['order'])) {
 			$url .= '&order=' . $this->request->get['order'];
 		}
@@ -610,6 +619,7 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['add'] = $this->url->link('catalog/product/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['copy'] = $this->url->link('catalog/product/copy', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['update_images'] = $this->url->link('catalog/product/updateImages', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('catalog/product/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['enabled'] = $this->url->link('catalog/product/enable', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['disabled'] = $this->url->link('catalog/product/disable', 'user_token=' . $this->session->data['user_token'] . $url, true);
@@ -633,6 +643,7 @@ class ControllerCatalogProduct extends Controller {
 			'filter_sub_category'	=> $filter_sub_category,
 			'filter_manufacturer_id'=> $filter_manufacturer_id,
 			'filter_noindex' 		=> $filter_noindex,
+			'filter_no_image'		=> $filter_no_image,
 			'sort'            		=> $sort,
 			'order'           		=> $order,
 			'start'           		=> ($page - 1) * $this->config->get('config_limit_admin'),
@@ -645,13 +656,19 @@ class ControllerCatalogProduct extends Controller {
 		$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
 
 		$results = $this->model_catalog_product->getProducts($filter_data);
-
+		
+		$data['popup_image_width'] = $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width');
+		$data['popup_image_height'] = $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height');
 		foreach ($results as $result) {
 			if (is_file(DIR_IMAGE . $result['image'])) {
-				$image = $this->model_tool_image->resize($result['image'], 40, 40);
+				$thumb = $this->model_tool_image->resize($result['image'], 40, 40);
+				$image = $result['image'];
+				$popup_image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height'));
 			} else {
-				$image = $this->model_tool_image->resize('no_image.png', 40, 40);
-			}
+				$thumb = $this->model_tool_image->resize('no_image.png', 40, 40);
+				$image = "";
+				$popup_image = $this->model_tool_image->resize('no_image.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height'));
+			}			
 
 			$special = false;
 
@@ -665,9 +682,12 @@ class ControllerCatalogProduct extends Controller {
 				}
 			}
 
+			$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 40, 40);
 			$data['products'][] = array(
 				'product_id' => $result['product_id'],
 				'image'      => $image,
+				'thumb'		 => $thumb,
+				'popup_image'=> $popup_image,
 				'name'       => $result['name'],
 				'model'      => $result['model'],
 				'price'      => $this->currency->format($result['price'], $this->config->get('config_currency')),
@@ -755,6 +775,10 @@ class ControllerCatalogProduct extends Controller {
 			$url .= '&filter_noindex=' . $this->request->get['filter_noindex'];
 		}
 
+		if (isset($this->request->get['filter_no_image'])) {
+			$url .= '&filter_no_image';
+		}
+
 		if ($order == 'ASC') {
 			$url .= '&order=DESC';
 		} else {
@@ -826,6 +850,10 @@ class ControllerCatalogProduct extends Controller {
 			$url .= '&filter_noindex=' . $this->request->get['filter_noindex'];
 		}
 
+		if (isset($this->request->get['filter_no_image'])) {
+			$url .= '&filter_no_image';
+		}
+
 		if (isset($this->request->get['sort'])) {
 			$url .= '&sort=' . $this->request->get['sort'];
 		}
@@ -874,6 +902,7 @@ class ControllerCatalogProduct extends Controller {
 		$pagination = new Pagination();
 		$pagination->total = $product_total;
 		$pagination->page = $page;
+		$pagination->class = "product-pagination";
 		$pagination->limit = $this->config->get('config_limit_admin');
 		$pagination->url = $this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
 
@@ -896,6 +925,7 @@ class ControllerCatalogProduct extends Controller {
 		$data['filter_manufacturer_name'] = $filter_manufacturer_name;
 		$data['filter_manufacturer_id'] = $filter_manufacturer_id;
 		$data['filter_noindex'] = $filter_noindex;
+		$data['filter_no_image'] = $filter_no_image;
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
@@ -2037,6 +2067,93 @@ class ControllerCatalogProduct extends Controller {
 		
 		}
 
+		$this->response->redirect($this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'] . $url, true));
+	}
+
+	public function updateImages() {
+
+		$this->load->model('catalog/product');
+		$this->load->language('catalog/product');
+		$url = '';
+
+		foreach ($this->request->post['images'] as $product_id => $image) {
+			$data[] = array(
+				'product_id' => $product_id,
+				'newImage'   => $image
+			);
+		}
+
+		$this->model_catalog_product->setImages($data);
+
+		$this->session->data['success'] = $this->language->get('text_success');
+
+		if (isset($this->request->get['filter_name'])) {
+			$url .= '&filter_name=' . urlencode(html_entity_decode($this->request->get['filter_name'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['filter_model'])) {
+			$url .= '&filter_model=' . urlencode(html_entity_decode($this->request->get['filter_model'], ENT_QUOTES, 'UTF-8'));
+		}
+
+		if (isset($this->request->get['filter_price'])) {
+			$url .= '&filter_price=' . $this->request->get['filter_price'];
+		}
+		
+		if (isset($this->request->get['filter_price_min'])) {
+			$url .= '&filter_price_min=' . $this->request->get['filter_price_min'];
+		}
+		
+		if (isset($this->request->get['filter_price_max'])) {
+			$url .= '&filter_price_max=' . $this->request->get['filter_price_max'];
+		}
+
+		if (isset($this->request->get['filter_quantity'])) {
+			$url .= '&filter_quantity=' . $this->request->get['filter_quantity'];
+		}
+		
+		if (isset($this->request->get['filter_quantity_min'])) {
+			$url .= '&filter_quantity_min=' . $this->request->get['filter_quantity_min'];
+		}
+		
+		if (isset($this->request->get['filter_quantity_max'])) {
+			$url .= '&filter_quantity_max=' . $this->request->get['filter_quantity_max'];
+		}
+
+		if (isset($this->request->get['filter_status'])) {
+			$url .= '&filter_status=' . $this->request->get['filter_status'];
+		}
+		
+		if (isset($this->request->get['filter_category'])) {
+			$url .= '&filter_category=' . $this->request->get['filter_category'];
+			if (isset($this->request->get['filter_sub_category'])) {
+				$url .= '&filter_sub_category';
+			}
+		}
+		
+		if (isset($this->request->get['filter_manufacturer_id'])) {
+			$url .= '&filter_manufacturer_id=' . $this->request->get['filter_manufacturer_id'];
+		}
+		
+		if (isset($this->request->get['filter_noindex'])) {
+			$url .= '&filter_noindex=' . $this->request->get['filter_noindex'];
+		}
+
+		if (isset($this->request->get['filter_no_image'])) {
+			$url .= '&filter_no_image';
+		}
+
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
+		
 		$this->response->redirect($this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'] . $url, true));
 	}
 }

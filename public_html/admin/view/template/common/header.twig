@@ -21,6 +21,13 @@
 <script src="https://api-maps.yandex.ru/2.1/?apikey={{ yandex_api_key }}&lang=ru_RU" type="text/javascript"></script>
 <link href="view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" media="screen" />
 <link type="text/css" href="view/stylesheet/stylesheet.css" rel="stylesheet" media="screen" />
+
+<!-- Core photoswipe file -->
+<link rel="stylesheet" href="view/javascript/photoswipe/dist/photoswipe.css"> 
+<link rel="stylesheet" href="view/javascript/photoswipe/dist/default-skin/default-skin.css"> 
+<script src="view/javascript/photoswipe/dist/photoswipe.min.js"></script> 
+<script src="view/javascript/photoswipe/dist/photoswipe-ui-default.min.js"></script> 
+
 {% for style in styles %}
 <link type="text/css" href="{{ style.href }}" rel="{{ style.rel }}" media="{{ style.media }}" />
 {% endfor %}
