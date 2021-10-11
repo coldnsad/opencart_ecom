@@ -111,7 +111,8 @@ class ControllerCommonHeader extends Controller {
 		$data['cart'] = $this->load->controller('common/cart');
 		$data['phone'] = $this->load->controller('common/phone');
 		$data['menu'] = $this->load->controller('common/menu');
-
+		
+		$data['yandex_api_key'] = $this->config->get('config_yandex_api_key');
 		return $this->load->view('common/header', $data);
 	}
 }

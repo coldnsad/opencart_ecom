@@ -171,7 +171,15 @@
                 <div class="col-sm-10">
                   <input type="text" name="config_fax" value="{{ config_fax }}" placeholder="{{ entry_fax }}" id="input-fax" class="form-control" />
                 </div>
-              </div>              
+              </div>
+              {# Yandex Api Key #}
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-yandex-api-key">{{ entry_yandex_api }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="config_yandex_api_key" value="{{ config_yandex_api_key }}" placeholder="{{ entry_yandex_api }}" id="input-yandex-api-key" class="form-control" />
+                </div>
+              </div>
+              {# END Yandex Api Key #}              
               <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-image">{{ entry_image }}</label>
                 <div class="col-sm-10"><a href="" id="thumb-image" data-toggle="image" class="img-thumbnail"><img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>

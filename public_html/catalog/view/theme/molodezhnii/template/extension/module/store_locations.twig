@@ -1,0 +1,101 @@
+<div class="container" id="map" style="width: {{ width }}px; height: {{ height }}px;"></div>
+
+<script type="text/javascript"> 
+
+//geoFindMe();
+(ymaps.ready(init));
+
+function init() { 
+
+  if(!navigator.geolocation) {
+    console.log('Geolocation is not supported by your browser');
+  } else { 
+    navigator.geolocation.getCurrentPosition(success, error);
+  }
+
+  function success(position) {
+    
+    stores_data = {{ stores_coordinates|json_encode() }};  
+
+    var myMap = new ymaps.Map("map", {
+            center: [stores_data[0].geometry.coordinates[0] , stores_data[0].geometry.coordinates[1]],
+            zoom: 15
+        }, {
+            searchControlProvider: 'yandex#search'
+        }),
+        stores, myPosition;
+    
+    function findClosestObjects () {
+        // Найдем в выборке кафе, ближайшее к найденной станции метро,
+        // и откроем его балун.
+        stores.getClosestTo(myPosition.get(0)).balloon.open();
+        
+        // Будем открывать балун кафе, который ближе всего к месту клика
+        myMap.events.add('click', function (event) {
+            stores.getClosestTo(event.get('coords')).balloon.open();
+        });
+    }
+    
+    // Описания кафе можно хранить в формате JSON, а потом генерировать
+    // из описания геообъекты с помощью ymaps.geoQuery.
+    stores = ymaps.geoQuery({
+        type: 'FeatureCollection',
+        features: stores_data  
+    // Сразу добавим точки на карту.
+    }).addToMap(myMap);
+    
+
+
+    var location = ymaps.geolocation.get();
+    // Асинхронная обработка ответа.
+    location.then(
+      function(result) {
+        // Добавление местоположения на карту.
+        myMap.geoObjects.add(result.geoObjects)
+      },
+      function(err) {
+        console.log('Ошибка: ' + err)
+      }
+    );
+    console.log(position.coords.latitude);
+    console.log(position.coords.longitude);
+    // С помощью обратного геокодирования найдем метро "Кропоткинская".
+    myPosition = ymaps.geoQuery(ymaps.geocode([position.coords.latitude, position.coords.longitude]))
+    // Нужно дождаться ответа от сервера и только потом обрабатывать полученные результаты.
+        .then(findClosestObjects);
+    
+  } 
+
+  function error() {
+    console.log('Unable to retrieve your location');
+  }
+  
+}
+
+
+
+{# function geoFindMe() {
+
+  function success(position) {
+    window.coords  =  {
+      latitude : position.coords.latitude,
+      longitude: position.coords.longitude
+    }
+    //console.log(window.coords);
+  } 
+  
+
+  function error() {
+    console.log('Unable to retrieve your location');
+  }
+
+  if(!navigator.geolocation) {
+    console.log('Geolocation is not supported by your browser');
+  } else { 
+    navigator.geolocation.getCurrentPosition(success, error);
+   //console.log(window.coords);
+  }
+
+} #}
+
+</script>

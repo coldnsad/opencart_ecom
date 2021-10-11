@@ -261,6 +261,12 @@ class ControllerSettingSetting extends Controller {
 		} else {
 			$data['config_fax'] = $this->config->get('config_fax');
 		}
+
+		if (isset($this->request->post['config_yandex_api_key'])) {
+			$data['config_yandex_api_key'] = $this->request->post['config_yandex_api_key'];
+		} else {
+			$data['config_yandex_api_key'] = $this->config->get('config_yandex_api_key');
+		}
 		
 		if (isset($this->request->post['config_image'])) {
 			$data['config_image'] = $this->request->post['config_image'];

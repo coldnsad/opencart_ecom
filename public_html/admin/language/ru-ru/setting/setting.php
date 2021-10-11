@@ -48,6 +48,7 @@ $_['entry_geocode']                    = 'Геокод';
 $_['entry_email']                      = 'E-Mail';
 $_['entry_telephone']                  = 'Телефон';
 $_['entry_fax']                        = 'Факс';
+$_['entry_yandex_api']                 = 'Yandex API key(Maps)';
 $_['entry_image']                      = 'Изображения';
 $_['entry_open']                       = 'Режим работы';
 $_['entry_comment']                    = 'Комментарий';

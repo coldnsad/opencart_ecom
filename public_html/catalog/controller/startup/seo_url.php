@@ -24,11 +24,10 @@ class ControllerStartupSeoUrl extends Controller {
 		if (isset($this->request->get['_route_'])) {
 			$parts = explode('/', $this->request->get['_route_']);
 			
-		//seopro prepare route
-		if($this->config->get('config_seo_pro')){		
-			$parts = $this->seo_pro->prepareRoute($parts);
-		}
-		//seopro prepare route end
+			//seopro prepare route
+			if($this->config->get('config_seo_pro')){		
+				$parts = $this->seo_pro->prepareRoute($parts);
+			} //seopro prepare route end
 
 			// remove any empty arrays from trailing
 			if (utf8_strlen(end($parts)) == 0) {
