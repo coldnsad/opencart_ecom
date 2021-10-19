@@ -5,8 +5,8 @@
 class ControllerCatalogProductView extends Controller {
 	private $error = array();
 
-	public function index() {
-		$this->load->language('catalog/product');
+	public function index() {		
+		$this->load->language('catalog/product');	
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
@@ -95,19 +95,17 @@ class ControllerCatalogProductView extends Controller {
 
 			if (isset($this->request->get['page'])) {
 				$url .= '&page=' . $this->request->get['page'];
-			}
-			
-			$addresses = json_decode(file_get_contents(DIR_STORAGE . 'addresses.json'),true);
+			}		
+
+			$this->registry->set('Addresses', new Addresses($this->registry, DIR_STORAGE . 'addresses.json'));
+			$this->Addresses->getDataFromFile();
 			$view_category_data = $this->model_catalog_product->getViewCategories($view_id);
 
 			if ($view_category_data) {
 				
-				foreach ($view_category_data as $category_id) {
-					
-					$addresses["path=$category_id&view_id=$view_id"] = "index.php?route=product/view&path=$category_id&view_id=$view_id";
-				}
-				$addresses = json_encode($addresses);
-				file_put_contents(DIR_STORAGE . 'addresses.json', $addresses);
+				$category_id = $view_category_data[0];
+				$this->Addresses->addAddress("view_id=$view_id", "index.php?route=product/view&path=$category_id&view_id=$view_id");
+				$this->Addresses->saveNewDataInFile();
 			}
 
 			$this->response->redirect($this->url->link('catalog/product_view', 'user_token=' . $this->session->data['user_token'] . $url, true));
@@ -314,12 +312,27 @@ class ControllerCatalogProductView extends Controller {
 
 		$this->load->model('catalog/product');
 		
-		$addresses = array();
+		$addresses = array();	
 
 		if (isset($this->request->post['selected']) && $this->validateCopy()) {
+
+			$this->registry->set('Addresses', new Addresses($this->registry, DIR_STORAGE . 'addresses.json'));
+			$this->Addresses->getDataFromFile();
+
 			foreach ($this->request->post['selected'] as $product_id) {
-				$this->model_catalog_product->copyProduct($product_id);
+				
+				$view_id = $this->model_catalog_product->copyProduct($product_id);
+
+				$view_category_data = $this->model_catalog_product->getViewCategories($view_id);
+
+				if ($view_category_data) {
+
+					$category_id = $view_category_data[0];
+					$this->Addresses->addAddress("view_id=$view_id", "index.php?route=product/view&path=$category_id&view_id=$view_id");					
+				}
 			}
+
+			$this->Addresses->saveNewDataInFile();
 
 			$this->session->data['success'] = $this->language->get('text_success');
 

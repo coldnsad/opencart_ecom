@@ -96,22 +96,20 @@ class ControllerCatalogProductOffer extends Controller {
 
 			if (isset($this->request->get['page'])) {
 				$url .= '&page=' . $this->request->get['page'];
-			}
+			}	
 
-			$addresses = json_decode(file_get_contents(DIR_STORAGE . 'addresses.json'),true);
+			$this->registry->set('Addresses', new Addresses($this->registry, DIR_STORAGE . 'addresses.json'));
+			$this->Addresses->getDataFromFile();
 			$offer_category_data = $this->model_catalog_product->getOfferCategories($offer_id);
-
+			
 			if ($offer_category_data) {
+
+				$category_id = $offer_category_data[0];
 				
-				foreach ($offer_category_data as $category_id) {
-					
-					$addresses["path=$category_id&offer_id=$offer_id"] = "index.php?route=product/offer&path=$category_id&offer_id=$offer_id";
-				}
-				$addresses = json_encode($addresses);
-				file_put_contents(DIR_STORAGE . 'addresses.json', $addresses);
-			}
-
-
+				$this->Addresses->addAddress("offer_id=$offer_id", "index.php?route=product/offer&path=$category_id&offer_id=$offer_id");
+				$this->Addresses->saveNewDataInFile();
+			}	
+			
 			$this->response->redirect($this->url->link('catalog/product_offer', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
@@ -311,11 +309,26 @@ class ControllerCatalogProductOffer extends Controller {
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$this->load->model('catalog/product');		
-
+				
 		if (isset($this->request->post['selected']) && $this->validateCopy()) {
+
+			$this->registry->set('Addresses', new Addresses($this->registry, DIR_STORAGE . 'addresses.json'));
+			$this->Addresses->getDataFromFile();
+
 			foreach ($this->request->post['selected'] as $product_id) {
-				$this->model_catalog_product->copyProduct($product_id);
+
+				$offer_id = $this->model_catalog_product->copyProduct($product_id);
+
+				$offer_category_data = $this->model_catalog_product->getOfferCategories($offer_id);
+			
+				if ($offer_category_data) {
+
+					$category_id = $offer_category_data[0];
+					$this->Addresses->addAddress("offer_id=$offer_id", "index.php?route=product/offer&path=$category_id&offer_id=$offer_id");									
+				}
 			}
+
+			$this->Addresses->saveNewDataInFile();
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -382,21 +395,7 @@ class ControllerCatalogProductOffer extends Controller {
 
 			if (isset($this->request->get['page'])) {
 				$url .= '&page=' . $this->request->get['page'];
-			}
-
-			//Product_id change to offer_id
-			$addresses = json_decode(file_get_contents(DIR_STORAGE . 'addresses.json'),true);
-			$offer_category_data = $this->model_catalog_product->getOfferCategories($product_id);
-
-			if ($offer_category_data) {
-				
-				foreach ($offer_category_data as $category_id) {
-					
-					$addresses["path=$category_id&offer_id=$product_id"] = "index.php?route=product/offer&path=$category_id&offer_id=$product_id";
-				}
-				$addresses = json_encode($addresses);
-				file_put_contents(DIR_STORAGE . 'addresses.json', $addresses);
-			}
+			}		
 
 			$this->response->redirect($this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}

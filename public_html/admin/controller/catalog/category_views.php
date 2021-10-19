@@ -63,16 +63,16 @@ class ControllerCatalogCategoryViews extends Controller {
 			if (isset($this->request->get['page'])) {
 				$url .= '&page=' . $this->request->get['page'];
 			}
-
-			$addresses = json_decode(file_get_contents(DIR_STORAGE . 'addresses.json'),true);
+			
+			$this->registry->set('Addresses', new Addresses($this->registry, DIR_STORAGE . 'addresses.json'));
+			$this->Addresses->getDataFromFile();
 			$views = $this->model_catalog_category_views->getCategory($views_id);
 
 			if ($views) {
 
 				$addresses["path=$views_id"] = "index.php?route=product/views&path=$views_id";
-
-				$addresses = json_encode($addresses);
-				file_put_contents(DIR_STORAGE . 'addresses.json', $addresses);
+				$this->Addresses->addAddress("path=$views_id", "index.php?route=product/views&path=$views_id");
+				$this->Addresses->saveNewDataInFile();
 			}
 
 			$this->response->redirect($this->url->link('catalog/category_views', 'user_token=' . $this->session->data['user_token'] . $url, true));
