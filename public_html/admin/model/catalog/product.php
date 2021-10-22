@@ -1674,7 +1674,7 @@ class ModelCatalogProduct extends Model {
 		$sql = "SELECT DISTINCT * FROM " . DB_PREFIX . "offer o LEFT JOIN " . DB_PREFIX . "offer_description od ON (o.offer_id = od.offer_id) WHERE od.language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
 		if (isset($data['filter_category']) && !is_null($data['filter_category'])) {
-			preg_match('/(.*)(WHERE pd\.language_id.*)/', $sql, $sql_crutch_matches);
+			preg_match('/(.*)(WHERE od\.language_id.*)/', $sql, $sql_crutch_matches);
 		if (isset($sql_crutch_matches[2])) {
 		$sql = $sql_crutch_matches[1] . " LEFT JOIN " . DB_PREFIX . "offer_to_category o2c ON (o.offer_id = o2c.offer_id)" . $sql_crutch_matches[2];
 		} else {
@@ -1794,9 +1794,9 @@ class ModelCatalogProduct extends Model {
 		$sql = "SELECT * FROM " . DB_PREFIX . "view v LEFT JOIN " . DB_PREFIX . "view_description vd ON (v.view_id = vd.view_id) WHERE vd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
 		if (isset($data['filter_category']) && !is_null($data['filter_category'])) {
-			preg_match('/(.*)(WHERE pd\.language_id.*)/', $sql, $sql_crutch_matches);
+			preg_match('/(.*)(WHERE vd\.language_id.*)/', $sql, $sql_crutch_matches);
 		if (isset($sql_crutch_matches[2])) {
-		$sql = $sql_crutch_matches[1] . " LEFT JOIN " . DB_PREFIX . "v_to_category v2c ON (v.view_id = v2c.view_id)" . $sql_crutch_matches[2];
+		$sql = $sql_crutch_matches[1] . " LEFT JOIN " . DB_PREFIX . "view_to_category v2c ON (v.view_id = v2c.view_id)" . $sql_crutch_matches[2];
 		} else {
 			$data['filter_category'] = null;
 			}

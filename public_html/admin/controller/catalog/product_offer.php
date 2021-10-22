@@ -479,11 +479,9 @@ class ControllerCatalogProductOffer extends Controller {
 		$filter_category_name = null;
 		if (isset($filter_category)) {
 			if ($filter_category>0) {
-				$this->load->model('catalog/category');
-				
+				$this->load->model('catalog/category_offers');
 
-				
-				$category = $this->model_catalog_category->getCategory($filter_category);
+				$category = $this->model_catalog_category_offers->getCategory($filter_category);
 				if ($category) {
 					$filter_category_name = ($category['path']) ? $category['path'] . ' &gt; ' . $category['name'] : $category['name'];
 				} else {

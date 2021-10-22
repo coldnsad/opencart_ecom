@@ -388,10 +388,10 @@ $('#button-filter').on('click', function() {
 		url += '&filter_noindex=' + encodeURIComponent(filter_noindex);
 	}
 
-	location = 'index.php?route=catalog/product&user_token={{ user_token }}' + url;
+	location = 'index.php?route=catalog/product_offer&user_token={{ user_token }}' + url;
 });
 $('#button-clear-filter').on('click', function() {
-	location = 'index.php?route=catalog/product&user_token={{ user_token }}';
+	location = 'index.php?route=catalog/product_offer&user_token={{ user_token }}';
 });
 //--></script> 
   <script type="text/javascript"><!--
@@ -453,7 +453,7 @@ $('input[name=\'filter_category_name\']').autocomplete({
 			$('input[name=\'filter_category\']').val(null);
 		}
 		$.ajax({
-			url: 'index.php?route=catalog/category/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+			url: 'index.php?route=catalog/category_offers/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
 			dataType: 'json',
 			success: function(json) {
 				if (json.length>0) {
